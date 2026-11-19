@@ -38,8 +38,50 @@
   <style>
     #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background-color: #020617; }
   </style>
+
+<style>
+body.intro-active { overflow: hidden; }
+.intro-curtain {
+  position: fixed; inset: 0; z-index: 9999;
+  background-color: rgba(10, 10, 12, 0.96);
+  backdrop-filter: blur(12px);
+  display: flex; justify-content: center; align-items: center;
+  padding: 1.5rem; transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.intro-curtain.cleared { opacity: 0; visibility: hidden; pointer-events: none; }
+.intro-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 0.75rem; }
+.intro-header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.25rem; }
+.intro-logo { width: 48px; height: auto; }
+.skip-btn {
+  background: transparent; color: #bbb; border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.85rem; font-size: 0.85rem; border-radius: 20px; cursor: pointer; transition: all 0.2s ease;
+}
+.skip-btn:hover { color: #fff; border-color: #fff; background: rgba(255, 255, 255, 0.08); }
+.intro-video-container {
+  width: 100%; aspect-ratio: 9 / 16; border-radius: 16px; overflow: hidden;
+  background: #000; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+.intro-video-container video { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+
 </head>
 <body class="animate-liquidity" class="bg-neutral-950 text-neutral-100 font-sans min-h-screen flex flex-col justify-between antialiased selection:bg-green-500 selection:text-neutral-950">
+
+<div id="intro-curtain" class="intro-curtain">
+  <div class="intro-box">
+    <div class="intro-header">
+      <img src="bear-mascot.png" alt="Bama Bear" class="intro-logo">
+      <button id="skip-btn" class="skip-btn" type="button">Skip to Site &rarr;</button>
+    </div>
+    <div class="intro-video-container">
+      <video id="premiere-video" playsinline controls preload="auto">
+        <source src="assets/standup-other-room.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</div>
+
   <div id="particles-js"></div>
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
@@ -172,5 +214,29 @@
       "retina_detect": true
     });
   </script>
+
+<script>
+(() => {
+  const curtain = document.getElementById("intro-curtain");
+  const premiereVideo = document.getElementById("premiere-video");
+  const skipButton = document.getElementById("skip-btn");
+  if (!curtain || !premiereVideo || !skipButton) return;
+  const introCleared = sessionStorage.getItem("bama_intro_cleared") === "true";
+  if (introCleared) {
+    curtain.classList.add("cleared");
+  } else {
+    document.body.classList.add("intro-active");
+  }
+  const clearIntro = () => {
+    premiereVideo.pause();
+    curtain.classList.add("cleared");
+    document.body.classList.remove("intro-active");
+    sessionStorage.setItem("bama_intro_cleared", "true");
+  };
+  premiereVideo.addEventListener("ended", clearIntro);
+  skipButton.addEventListener("click", clearIntro);
+})();
+</script>
+
 </body>
 </html>
